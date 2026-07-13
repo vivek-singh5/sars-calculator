@@ -185,13 +185,15 @@
   }
   .card-head{
     display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;
+    flex-wrap:wrap; gap:10px;
   }
   .card-head h2{
     font-family: var(--font-display); font-size:17px; font-weight:600; letter-spacing:0.01em;
   }
+  .head-tags{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
   .tag{
     font-family: var(--font-mono); font-size:10.5px; padding:4px 9px; border-radius:20px;
-    letter-spacing:0.06em; text-transform:uppercase;
+    letter-spacing:0.06em; text-transform:uppercase; white-space:nowrap;
   }
   .tag.now{ background: rgba(55,230,196,0.15); color: var(--teal); border:1px solid rgba(55,230,196,0.3); }
   .tag.proj{ background: rgba(79,184,255,0.15); color: var(--cyan); border:1px solid rgba(79,184,255,0.3); }
@@ -222,10 +224,10 @@
   .row.total.tax .v{ color: var(--coral); }
 
   .growth-pill{
-    position:absolute; top:26px; right:26px;
-    font-family: var(--font-mono); font-weight:700; font-size:13px;
+    font-family: var(--font-mono); font-weight:700; font-size:12.5px;
     color: var(--teal); background: rgba(55,230,196,0.12);
     border:1px solid rgba(55,230,196,0.3); padding:4px 10px; border-radius:20px;
+    white-space:nowrap;
   }
   .growth-pill.neg{ color: var(--coral); background: rgba(255,111,111,0.12); border-color: rgba(255,111,111,0.3); }
 
@@ -305,25 +307,6 @@
     </div>
   </header>
 
-  <div class="controls">
-    <div class="field">
-      <label>Quantity of SARs</label>
-      <div class="inputrow"><input type="number" id="qty" value="1000" min="0" /></div>
-    </div>
-    <div class="field">
-      <label>Allotted Price</label>
-      <div class="inputrow"><span class="prefix">₹</span><input type="number" id="allotted" value="1130" min="0" /></div>
-    </div>
-    <div class="field">
-      <label>Tax Rate (on gain)</label>
-      <div class="inputrow"><input type="number" id="taxRate" value="31.2" step="0.1" min="0" max="100" /><span class="prefix">%</span></div>
-    </div>
-    <div class="field">
-      <label>Date Allotted</label>
-      <div class="inputrow"><input type="date" id="allotDate" /></div>
-    </div>
-  </div>
-
   <div class="cards">
 
     <!-- CURRENT VALUE -->
@@ -333,11 +316,17 @@
         <span class="tag now">Live · Today</span>
       </div>
 
-      <div class="row"><span class="k">Quantity</span><span class="v" id="c_qty">1,000</span></div>
-      <div class="row"><span class="k">Allotted Price</span><span class="v" id="c_allotted">₹1,130</span></div>
       <div class="row editable">
-        <span class="k">Exercised Price <span class="badge-live" id="curLiveBadge" style="display:none;">LIVE</span></span>
-        <input type="number" id="c_exercised" value="1201" />
+        <span class="k">Quantity</span>
+        <input type="number" id="c_qty" value="1000" min="0" />
+      </div>
+      <div class="row editable">
+        <span class="k">Allotted Price</span>
+        <input type="number" id="c_allotted" value="1130" min="0" />
+      </div>
+      <div class="row">
+        <span class="k">Exercised Price <span class="badge-live" id="curLiveBadge" style="display:none;">LIVE = CMP</span></span>
+        <span class="v" id="c_exercised_display">₹—</span>
       </div>
 
       <div class="divider"></div>
@@ -350,14 +339,16 @@
 
     <!-- PROJECTED VALUE -->
     <div class="card projected">
-      <span class="growth-pill" id="growthPill">+0%</span>
       <div class="card-head">
         <h2>Projected Value</h2>
-        <span class="tag proj">Scenario</span>
+        <div class="head-tags">
+          <span class="tag proj">Scenario</span>
+          <span class="growth-pill" id="growthPill">+0%</span>
+        </div>
       </div>
 
-      <div class="row"><span class="k">Quantity</span><span class="v" id="p_qty">1,000</span></div>
-      <div class="row"><span class="k">Allotted Price</span><span class="v" id="p_allotted">₹1,130</span></div>
+      <div class="row"><span class="k">Quantity <span class="badge-live">from Current</span></span><span class="v" id="p_qty">1,000</span></div>
+      <div class="row"><span class="k">Allotted Price <span class="badge-live">from Current</span></span><span class="v" id="p_allotted">₹1,130</span></div>
       <div class="row editable">
         <span class="k">Target Price</span>
         <input type="number" id="p_exercised" value="1500" />
@@ -394,7 +385,7 @@
       <li><b>Perquisite vs capital gains tax:</b> in India, ESOP/SAR gains are usually taxed twice — as a <b>perquisite</b> (salary income, at your slab rate) on the spread at exercise, and again as <b>capital gains</b> (STCG/LTCG) if the share price moves further before you sell. This tool applies one flat rate for simplicity — check with a CA for your exact slab + holding period.</li>
       <li><b>Holding period:</b> shares held over 12 months from exercise qualify for LTCG (lower rate) instead of STCG — worth tracking your exercise date separately from your allotment date.</li>
       <li><b>Multiple tranches:</b> if you have SARs allotted at different prices/dates, each tranche has its own break-even and tax timeline — this version handles one tranche at a time.</li>
-      <li><b>CMP live-fetch</b> is best-effort (via a public Yahoo Finance proxy) and can be blocked by ad-blockers, browser CSP, or being offline — the Exercised/Target Price fields are always editable manually as a fallback.</li>
+      <li><b>CMP live-fetch</b> is best-effort (routed through a few public CORS proxies with automatic fallback) and can still fail if you're offline or every proxy is down — tap the refresh icon to retry. The <b>Target Price</b> in the Projected card is always yours to edit.</li>
     </ul>
   </div>
 
@@ -427,33 +418,35 @@
   }
 
   let lastValues = {};
+  const TAX_RATE = 0.312; // 31.2% — flat rate applied to gain, kept out of the UI per request
+  let liveCMP = null; // last successfully fetched market price
 
   function calc(){
-    const qty = parseFloat(el('qty').value) || 0;
-    const allotted = parseFloat(el('allotted').value) || 0;
-    const taxRate = (parseFloat(el('taxRate').value) || 0) / 100;
+    const qty = parseFloat(el('c_qty').value) || 0;
+    const allotted = parseFloat(el('c_allotted').value) || 0;
+    const taxRate = TAX_RATE;
 
-    const cExercised = parseFloat(el('c_exercised').value) || 0;
+    const cExercised = liveCMP !== null ? liveCMP : 0;
     const pExercised = parseFloat(el('p_exercised').value) || 0;
 
-    // static mirrored fields
-    el('c_qty').textContent = fmtNum(qty);
-    el('c_allotted').textContent = fmtINR(allotted);
+    // projected mirrors current inputs
     el('p_qty').textContent = fmtNum(qty);
     el('p_allotted').textContent = fmtINR(allotted);
     el('note_breakeven').textContent = fmtNum(allotted);
+    el('c_exercised_display').textContent = liveCMP !== null ? fmtINR(liveCMP) : '₹—';
 
-    // current value calcs
-    const cProfit = Math.max(0, cExercised - allotted) * qty;
+    // current value calcs — held back until we have a real live price
+    const haveCMP = liveCMP !== null;
+    const cProfit = haveCMP ? Math.max(0, cExercised - allotted) * qty : 0;
     const cTax = cProfit * taxRate;
     const cVested = cProfit;
     const cNet = cVested - cTax;
-    const cGainPct = allotted ? ((cExercised - allotted) / allotted) * 100 : 0;
+    const cGainPct = (haveCMP && allotted) ? ((cExercised - allotted) / allotted) * 100 : 0;
 
     animateNumber(el('c_tax'), lastValues.cTax ?? 0, cTax, true);
     animateNumber(el('c_vested'), lastValues.cVested ?? 0, cVested, true);
     animateNumber(el('c_net'), lastValues.cNet ?? 0, cNet, true);
-    el('c_gainpct').textContent = fmtPct(cGainPct);
+    el('c_gainpct').textContent = haveCMP ? fmtPct(cGainPct) : '—';
     el('c_gainpct').style.color = cGainPct >= 0 ? 'var(--teal)' : 'var(--coral)';
 
     // projected value calcs
@@ -467,15 +460,25 @@
     animateNumber(el('p_net'), lastValues.pNet ?? 0, pNet, true);
 
     // growth pill: price growth vs current exercised price
-    const priceGrowth = cExercised ? ((pExercised - cExercised) / cExercised) * 100 : 0;
     const pill = el('growthPill');
-    pill.textContent = (priceGrowth >= 0 ? '+' : '') + priceGrowth.toFixed(1) + '%';
-    pill.classList.toggle('neg', priceGrowth < 0);
+    if (haveCMP && cExercised){
+      const priceGrowth = ((pExercised - cExercised) / cExercised) * 100;
+      pill.textContent = (priceGrowth >= 0 ? '+' : '') + priceGrowth.toFixed(1) + '%';
+      pill.classList.toggle('neg', priceGrowth < 0);
+    } else {
+      pill.textContent = '—';
+      pill.classList.remove('neg');
+    }
 
     // net growth vs current net
-    const netGrowth = cNet ? ((pNet - cNet) / cNet) * 100 : 0;
-    el('p_netgrowth').textContent = (netGrowth >= 0 ? '+' : '') + netGrowth.toFixed(1) + '%';
-    el('p_netgrowth').style.color = netGrowth >= 0 ? 'var(--teal)' : 'var(--coral)';
+    if (haveCMP && cNet){
+      const netGrowth = ((pNet - cNet) / cNet) * 100;
+      el('p_netgrowth').textContent = (netGrowth >= 0 ? '+' : '') + netGrowth.toFixed(1) + '%';
+      el('p_netgrowth').style.color = netGrowth >= 0 ? 'var(--teal)' : 'var(--coral)';
+    } else {
+      el('p_netgrowth').textContent = '—';
+      el('p_netgrowth').style.color = 'var(--ink-mid)';
+    }
 
     // comparison bars
     const maxNet = Math.max(cNet, pNet, 1);
@@ -493,7 +496,7 @@
   }
 
   // wire inputs
-  ['qty','allotted','taxRate','c_exercised','p_exercised'].forEach(id => {
+  ['c_qty','c_allotted','p_exercised'].forEach(id => {
     el(id).addEventListener('input', calc);
   });
   el('p_slider').addEventListener('input', (e) => {
@@ -501,55 +504,78 @@
     calc();
   });
 
-  // default allotment date = today minus 1 year, purely illustrative
-  const d = new Date(); d.setFullYear(d.getFullYear() - 1);
-  el('allotDate').value = d.toISOString().slice(0,10);
-
   calc();
 
   // ---------- live CMP fetch (best-effort, always falls back to manual) ----------
+  // Yahoo Finance itself doesn't send CORS headers, so a browser (including one
+  // hosted on GitHub Pages) can't call it directly — we route through a public
+  // CORS-proxy. No single proxy has 100% uptime, so we try a few in order.
+  const YAHOO_TARGET = 'https://query1.finance.yahoo.com/v8/finance/chart/NAUKRI.NS?interval=1d&range=1d';
+
+  const PROXIES = [
+    (u) => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
+    (u) => 'https://corsproxy.io/?url=' + encodeURIComponent(u),
+    (u) => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u),
+    (u) => 'https://thingproxy.freeboard.io/fetch/' + u,
+  ];
+
+  function fetchWithTimeout(url, ms){
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), ms);
+    return fetch(url, { cache: 'no-store', signal: controller.signal }).finally(() => clearTimeout(t));
+  }
+
   async function fetchLiveCMP(){
     const btn = el('refreshBtn');
     btn.classList.add('spinning');
     el('fetchNote').textContent = 'Fetching latest price for NAUKRI.NS…';
-    try{
-      const target = 'https://query1.finance.yahoo.com/v8/finance/chart/NAUKRI.NS?interval=1d&range=1d';
-      const proxied = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(target);
-      const res = await fetch(proxied, { cache: 'no-store' });
-      if (!res.ok) throw new Error('Network response not ok');
-      const data = await res.json();
-      const meta = data?.chart?.result?.[0]?.meta;
-      if (!meta || !meta.regularMarketPrice) throw new Error('No price in response');
 
-      const price = meta.regularMarketPrice;
-      const prevClose = meta.previousClose ?? meta.chartPreviousClose ?? price;
-      const change = price - prevClose;
-      const changePct = prevClose ? (change / prevClose) * 100 : 0;
+    let lastErr = null;
+    for (const buildUrl of PROXIES){
+      try{
+        const res = await fetchWithTimeout(buildUrl(YAHOO_TARGET), 6000);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const meta = data?.chart?.result?.[0]?.meta;
+        if (!meta || !meta.regularMarketPrice) throw new Error('No price in response');
 
-      el('cmpDisplay').textContent = fmtINR(price);
-      const chgNode = el('cmpChange');
-      chgNode.textContent = (change >= 0 ? '+' : '') + change.toFixed(2) + ' (' + changePct.toFixed(2) + '%)';
-      chgNode.className = 'chg ' + (change >= 0 ? 'up' : 'down');
+        const price = meta.regularMarketPrice;
+        const prevClose = meta.previousClose ?? meta.chartPreviousClose ?? price;
+        const change = price - prevClose;
+        const changePct = prevClose ? (change / prevClose) * 100 : 0;
 
-      el('liveDot').classList.remove('off');
-      el('lastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString();
-      el('fetchNote').textContent = 'Live price pulled from Yahoo Finance (NAUKRI.NS).';
+        el('cmpDisplay').textContent = fmtINR(price);
+        const chgNode = el('cmpChange');
+        chgNode.textContent = (change >= 0 ? '+' : '') + change.toFixed(2) + ' (' + changePct.toFixed(2) + '%)';
+        chgNode.className = 'chg ' + (change >= 0 ? 'up' : 'down');
 
-      // auto-fill current exercised price with live CMP
-      el('c_exercised').value = price.toFixed(2);
-      el('curLiveBadge').style.display = 'inline-block';
-      calc();
-    }catch(err){
-      el('liveDot').classList.add('off');
-      el('lastUpdated').textContent = 'Live fetch failed';
+        el('liveDot').classList.remove('off');
+        el('lastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+        el('fetchNote').textContent = 'Live price pulled from Yahoo Finance (NAUKRI.NS).';
+
+        liveCMP = price;
+        el('curLiveBadge').style.display = 'inline-block';
+        btn.classList.remove('spinning');
+        calc();
+        return; // success — stop trying other proxies
+      }catch(err){
+        lastErr = err;
+        // try next proxy
+      }
+    }
+
+    // all proxies failed
+    btn.classList.remove('spinning');
+    el('liveDot').classList.add('off');
+    el('lastUpdated').textContent = 'Live fetch failed';
+    if (liveCMP === null){
       el('cmpDisplay').textContent = '₹ —';
       el('cmpChange').textContent = 'Unavailable';
       el('cmpChange').className = 'chg';
-      el('fetchNote').textContent = 'Could not reach a live price feed from this browser (often blocked by CORS/network policy). Enter the Exercised Price manually below — it works exactly the same either way.';
       el('curLiveBadge').style.display = 'none';
-    }finally{
-      btn.classList.remove('spinning');
     }
+    el('fetchNote').textContent = 'All live-price proxies were unreachable just now (' + (lastErr?.message || 'network error') + '). Tap refresh to retry — this can happen if a proxy is temporarily down or your network blocks it.';
+    calc();
   }
 
   el('refreshBtn').addEventListener('click', fetchLiveCMP);
