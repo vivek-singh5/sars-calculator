@@ -5,582 +5,602 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NAUKRI SAR Calculator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg-deep:#070c16;
-    --bg-mid:#0d1730;
-    --glass-fill: rgba(255,255,255,0.055);
-    --glass-fill-strong: rgba(255,255,255,0.09);
-    --glass-border: rgba(255,255,255,0.14);
-    --ink-hi: #eef3fb;
-    --ink-mid: #9fb0c9;
-    --ink-low: #64738e;
-    --teal: #37e6c4;
-    --cyan: #4fb8ff;
-    --coral: #ff6f6f;
-    --amber: #ffb454;
-    --font-display: 'Space Grotesk', sans-serif;
-    --font-body: 'Inter', sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
+    --glass-bg: rgba(255,255,255,0.06);
+    --glass-border: rgba(255,255,255,0.18);
+    --glass-highlight: rgba(255,255,255,0.35);
+    --text-main: #eef1f8;
+    --text-dim: #a9b2c9;
+    --accent-blue: #5eb0ff;
+    --accent-purple: #b48bff;
+    --accent-teal: #5fe3c4;
+    --green: #4ee6a3;
+    --red: #ff6b7a;
+    --input-bg: rgba(255,255,255,0.85);
+    --input-text: #1a1a2e;
+    --radius: 22px;
   }
 
   *{box-sizing:border-box; margin:0; padding:0;}
 
-  html,body{
-    min-height:100%;
-    background: radial-gradient(ellipse at 20% -10%, #16274d 0%, transparent 55%),
-                radial-gradient(ellipse at 100% 0%, #0d2e35 0%, transparent 45%),
-                linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-mid) 100%);
-    color: var(--ink-hi);
-    font-family: var(--font-body);
+  body{
+    font-family:'Inter', sans-serif;
+    color:var(--text-main);
+    min-height:100vh;
+    background: #0b0f1e;
     overflow-x:hidden;
+    position:relative;
   }
 
-  /* ---------- liquid animated background blobs ---------- */
-  .liquid-layer{
-    position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none;
-  }
+  h1,h2,h3{font-family:'Poppins', sans-serif;}
+
+  /* ===== Animated Liquid Background ===== */
+  .bg-blobs{position:fixed; inset:0; z-index:-1; overflow:hidden;}
   .blob{
     position:absolute; border-radius:50%;
-    filter: blur(70px);
-    opacity:0.35;
-    mix-blend-mode: screen;
-    animation: drift 22s ease-in-out infinite;
+    filter: blur(90px);
+    opacity:0.55;
+    animation: float 18s ease-in-out infinite;
   }
-  .blob.b1{ width:520px; height:520px; background: radial-gradient(circle at 30% 30%, #2fd9c9, transparent 70%); top:-140px; left:-120px; animation-duration:26s;}
-  .blob.b2{ width:460px; height:460px; background: radial-gradient(circle at 60% 40%, #4a8bff, transparent 70%); top:10%; right:-160px; animation-duration:31s; animation-delay:-6s;}
-  .blob.b3{ width:380px; height:380px; background: radial-gradient(circle at 50% 50%, #ffb454, transparent 70%); bottom:-120px; left:20%; animation-duration:28s; animation-delay:-11s; opacity:0.18;}
-  @keyframes drift{
-    0%,100%{ transform: translate(0,0) scale(1); }
-    33%{ transform: translate(40px,-30px) scale(1.08); }
-    66%{ transform: translate(-30px,25px) scale(0.95); }
+  .blob1{width:520px;height:520px; background:linear-gradient(135deg,var(--accent-blue),var(--accent-purple)); top:-150px; left:-120px; animation-duration:20s;}
+  .blob2{width:460px;height:460px; background:linear-gradient(135deg,var(--accent-teal),var(--accent-blue)); bottom:-160px; right:-100px; animation-duration:24s; animation-delay:2s;}
+  .blob3{width:380px;height:380px; background:linear-gradient(135deg,var(--accent-purple),var(--red)); top:40%; left:40%; animation-duration:26s; animation-delay:4s; opacity:0.35;}
+
+  @keyframes float{
+    0%,100%{transform:translate(0,0) scale(1);}
+    25%{transform:translate(60px,-40px) scale(1.1);}
+    50%{transform:translate(-30px,50px) scale(0.95);}
+    75%{transform:translate(40px,30px) scale(1.05);}
   }
 
-  svg.goo{position:absolute; width:0; height:0;}
-
-  .wrap{
-    position:relative; z-index:1;
-    max-width:1180px; margin:0 auto;
-    padding: 40px 24px 80px;
-  }
-
-  /* ---------- header / ticker ---------- */
-  header{
-    display:flex; flex-wrap:wrap; gap:20px;
-    align-items:center; justify-content:space-between;
-    margin-bottom:28px;
-  }
-  .brand{
-    display:flex; flex-direction:column; gap:4px;
-  }
-  .eyebrow{
-    font-family: var(--font-mono); font-size:11px; letter-spacing:0.18em;
-    color: var(--teal); text-transform:uppercase;
-  }
-  h1{
-    font-family: var(--font-display); font-weight:700;
-    font-size: clamp(24px, 3.4vw, 34px);
-    letter-spacing:-0.01em;
-  }
-  .sub{ color: var(--ink-mid); font-size:13.5px; }
-
-  .ticker{
-    display:flex; align-items:center; gap:16px;
-    background: var(--glass-fill);
-    border:1px solid var(--glass-border);
-    backdrop-filter: blur(22px) saturate(140%);
-    -webkit-backdrop-filter: blur(22px) saturate(140%);
-    border-radius:18px;
-    padding: 12px 18px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
-  }
-  .ticker .sym{
-    font-family:var(--font-mono); font-size:12px; color:var(--ink-mid);
-    display:flex; flex-direction:column; gap:2px; line-height:1.3;
-  }
-  .ticker .sym b{ color:var(--ink-hi); font-size:13px; letter-spacing:0.03em;}
-  .ticker .price{
-    font-family:var(--font-mono); font-weight:700; font-size:22px; color:var(--ink-hi);
-  }
-  .ticker .chg{ font-family:var(--font-mono); font-size:12.5px; font-weight:600; }
-  .chg.up{ color: var(--teal); }
-  .chg.down{ color: var(--coral); }
-  .refresh-btn{
-    display:flex; align-items:center; justify-content:center;
-    width:36px; height:36px; border-radius:12px;
-    background: var(--glass-fill-strong); border:1px solid var(--glass-border);
-    cursor:pointer; color:var(--ink-hi);
-    transition: transform .5s ease, background .2s ease;
-  }
-  .refresh-btn:hover{ background: rgba(255,255,255,0.15); }
-  .refresh-btn.spinning svg{ animation: spin 0.9s linear infinite; }
-  @keyframes spin{ to{ transform: rotate(360deg); } }
-  .ticker .meta-btn{ display:flex; flex-direction:column; align-items:flex-start; gap:6px; }
-  .live-dot{
-    width:7px; height:7px; border-radius:50%; background: var(--teal);
-    box-shadow: 0 0 0 0 rgba(55,230,196,0.6);
-    animation: pulse 2s infinite;
-    display:inline-block; margin-right:6px;
-  }
-  .live-dot.off{ background: var(--ink-low); animation:none; }
-  @keyframes pulse{
-    0%{ box-shadow: 0 0 0 0 rgba(55,230,196,0.55); }
-    70%{ box-shadow: 0 0 0 8px rgba(55,230,196,0); }
-    100%{ box-shadow: 0 0 0 0 rgba(55,230,196,0); }
-  }
-  .fetch-note{ font-size:11px; color: var(--ink-low); font-family:var(--font-mono); max-width:220px; }
-
-  /* ---------- controls panel ---------- */
-  .controls{
-    display:grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr));
-    gap:14px; margin-bottom:26px;
-  }
-  .field{
-    background: var(--glass-fill);
-    border:1px solid var(--glass-border);
-    border-radius:14px; padding:12px 14px;
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-  }
-  .field label{
-    font-size:11px; text-transform:uppercase; letter-spacing:0.09em;
-    color: var(--ink-mid); font-family: var(--font-mono); display:block; margin-bottom:6px;
-  }
-  .field .inputrow{ display:flex; align-items:center; gap:6px; }
-  .field .prefix{ color: var(--ink-low); font-family:var(--font-mono); font-size:14px;}
-  .field input{
-    width:100%; background:transparent; border:none; outline:none;
-    color: var(--ink-hi); font-family: var(--font-mono); font-size:16px; font-weight:600;
-  }
-  .field input::-webkit-outer-spin-button, .field input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
-
-  /* ---------- glass cards ---------- */
-  .cards{
-    display:grid; grid-template-columns: 1fr 1fr; gap:22px;
-    margin-bottom: 26px;
-  }
-  @media (max-width: 780px){ .cards{ grid-template-columns: 1fr; } }
-
-  .card{
+  /* ===== Layout ===== */
+  .app{
+    max-width:1200px;
+    margin:0 auto;
+    padding:32px 20px 60px;
     position:relative;
-    border-radius:24px;
-    padding: 26px 26px 22px;
-    background: var(--glass-fill);
+    z-index:1;
+  }
+
+  header{
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
+    gap:16px; margin-bottom:28px;
+  }
+  header h1{
+    font-size:26px; font-weight:700;
+    background: linear-gradient(90deg,#fff, var(--accent-blue));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  header .sub{color:var(--text-dim); font-size:13px; margin-top:4px;}
+
+  /* ===== Glass Base ===== */
+  .glass{
+    background: var(--glass-bg);
     border:1px solid var(--glass-border);
-    backdrop-filter: blur(26px) saturate(150%);
-    -webkit-backdrop-filter: blur(26px) saturate(150%);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+    border-radius: var(--radius);
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08);
+    position:relative;
     overflow:hidden;
+    transition: transform .35s ease, box-shadow .35s ease;
   }
-  .card::before{
-    content:''; position:absolute; inset:0; border-radius:24px; padding:1px;
-    background: linear-gradient(135deg, rgba(255,255,255,0.35), rgba(255,255,255,0) 40%);
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor; mask-composite: exclude;
-    pointer-events:none;
+  .glass::before{
+    content:'';
+    position:absolute; top:0; left:0; right:0; height:1px;
+    background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
   }
-  .card.projected{
-    background: linear-gradient(160deg, rgba(79,184,255,0.09), rgba(255,255,255,0.04));
-  }
-  .card-head{
-    display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;
-    flex-wrap:wrap; gap:10px;
-  }
-  .card-head h2{
-    font-family: var(--font-display); font-size:17px; font-weight:600; letter-spacing:0.01em;
-  }
-  .head-tags{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-  .tag{
-    font-family: var(--font-mono); font-size:10.5px; padding:4px 9px; border-radius:20px;
-    letter-spacing:0.06em; text-transform:uppercase; white-space:nowrap;
-  }
-  .tag.now{ background: rgba(55,230,196,0.15); color: var(--teal); border:1px solid rgba(55,230,196,0.3); }
-  .tag.proj{ background: rgba(79,184,255,0.15); color: var(--cyan); border:1px solid rgba(79,184,255,0.3); }
+  .glass:hover{ box-shadow: 0 12px 44px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.1); }
 
-  .row{
+  /* ===== CMP Widget ===== */
+  .cmp-widget{
+    display:flex; align-items:center; gap:14px;
+    padding:14px 20px; border-radius:18px;
+    font-size:14px;
+  }
+  .cmp-widget .label{color:var(--text-dim); font-size:12px; text-transform:uppercase; letter-spacing:.5px;}
+  #cmpDisplay{font-size:22px; font-weight:700; font-family:'Poppins';}
+  #cmpChange{font-weight:600; font-size:13px;}
+  .cmp-block{display:flex; flex-direction:column; gap:2px;}
+  button{
+    cursor:pointer; border:none; border-radius:12px;
+    padding:9px 16px; font-weight:600; font-size:13px;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    color:#0b0f1e;
+    transition: transform .2s ease, filter .2s ease;
+  }
+  button:hover{transform:translateY(-2px); filter:brightness(1.1);}
+  button:active{transform:translateY(0px) scale(0.97);}
+  #lastUpdated{font-size:11px; color:var(--text-dim);}
+
+  .toggle-row{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-dim);}
+
+  /* ===== Cards Grid ===== */
+  .grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:24px;
+    margin-bottom:24px;
+  }
+  @media (max-width: 820px){ .grid{grid-template-columns: 1fr;} }
+
+  .card{padding:26px 26px 22px;}
+  .card h2{font-size:18px; margin-bottom:18px; display:flex; align-items:center; gap:8px;}
+  .card.current h2{color:var(--accent-blue);}
+  .card.projected h2{color:var(--accent-purple);}
+
+  .field{
     display:flex; align-items:center; justify-content:space-between;
-    padding: 10px 0; border-bottom: 1px dashed rgba(255,255,255,0.08);
+    margin-bottom:14px; gap:10px;
   }
-  .row:last-of-type{ border-bottom:none; }
-  .row .k{ color: var(--ink-mid); font-size:13.5px; }
-  .row .v{ font-family: var(--font-mono); font-weight:600; font-size:15px; }
-  .row.editable input{
-    background: rgba(255,255,255,0.06); border:1px solid var(--glass-border);
-    border-radius:8px; padding:5px 10px; text-align:right; width:120px;
-    color: var(--ink-hi); font-family:var(--font-mono); font-weight:600; font-size:14px;
+  .field label{font-size:13px; color:var(--text-dim); font-weight:500;}
+  .field label small{display:block; font-size:10px; opacity:0.8; font-weight:400;}
+
+  .field.editable input{
+    width:140px; text-align:right;
+    padding:9px 12px; border-radius:10px;
+    border:1px solid rgba(0,0,0,0.08);
+    background: var(--input-bg);
+    color: var(--input-text);
+    font-weight:600; font-size:14px;
     outline:none;
+    transition: box-shadow .2s ease, transform .2s ease;
   }
-  .row.editable input:focus{ border-color: var(--cyan); }
-  .row .badge-live{
-    font-size:9.5px; font-family: var(--font-mono); color: var(--teal);
-    background: rgba(55,230,196,0.12); padding:2px 6px; border-radius:6px; margin-left:8px;
+  .field.editable input:focus{
+    box-shadow: 0 0 0 3px rgba(94,176,255,0.45);
+    transform: scale(1.02);
   }
+  .field.editable input[type="date"]{width:150px;}
 
-  .divider{ height:1px; background: rgba(255,255,255,0.09); margin:14px 0; }
-
-  .row.total .v{ font-size:19px; }
-  .row.total.net .v{ color: var(--teal); }
-  .row.total.tax .v{ color: var(--coral); }
-
-  .growth-pill{
-    font-family: var(--font-mono); font-weight:700; font-size:12.5px;
-    color: var(--teal); background: rgba(55,230,196,0.12);
-    border:1px solid rgba(55,230,196,0.3); padding:4px 10px; border-radius:20px;
-    white-space:nowrap;
+  .field.readonly span{
+    font-weight:700; font-size:14.5px; font-family:'Poppins';
+    color:var(--text-main);
   }
-  .growth-pill.neg{ color: var(--coral); background: rgba(255,111,111,0.12); border-color: rgba(255,111,111,0.3); }
-
-  /* projected price slider */
-  .slider-wrap{ margin-top:6px; }
-  input[type=range]{
-    -webkit-appearance:none; width:100%; height:4px; border-radius:4px;
-    background: linear-gradient(90deg, var(--cyan), var(--teal));
-    outline:none; margin-top:10px;
-  }
-  input[type=range]::-webkit-slider-thumb{
-    -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
-    background: #fff; box-shadow: 0 0 0 4px rgba(79,184,255,0.35); cursor:pointer;
+  .field.readonly.highlight span{
+    font-size:19px;
+    background: linear-gradient(90deg, var(--accent-teal), var(--accent-blue));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
   }
 
-  /* ---------- comparison bars ---------- */
-  .compare{
-    background: var(--glass-fill); border:1px solid var(--glass-border);
-    border-radius:24px; padding:24px 26px; backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px); margin-bottom:22px;
-  }
-  .compare h3{ font-family: var(--font-display); font-size:15px; margin-bottom:16px; font-weight:600; color:var(--ink-hi);}
-  .bar-row{ margin-bottom:14px; }
-  .bar-label{ display:flex; justify-content:space-between; font-size:12.5px; color: var(--ink-mid); margin-bottom:6px; font-family:var(--font-mono);}
-  .bar-label b{ color: var(--ink-hi); }
-  .bar-track{ height:10px; border-radius:6px; background: rgba(255,255,255,0.06); overflow:hidden; }
-  .bar-fill{ height:100%; border-radius:6px; transition: width 0.9s cubic-bezier(.22,1,.36,1); }
-  .bar-fill.current{ background: linear-gradient(90deg, var(--teal), #1fb89c); }
-  .bar-fill.projected{ background: linear-gradient(90deg, var(--cyan), #2f6bff); }
+  hr{border:none; border-top:1px solid rgba(255,255,255,0.12); margin:16px 0;}
 
-  /* ---------- notes ---------- */
-  .notes{
-    background: var(--glass-fill); border:1px solid var(--glass-border);
-    border-radius:24px; padding:24px 26px; backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-  }
-  .notes h3{ font-family: var(--font-display); font-size:15px; margin-bottom:14px; font-weight:600;}
-  .notes ul{ list-style:none; display:flex; flex-direction:column; gap:10px; }
-  .notes li{ font-size:13px; color: var(--ink-mid); display:flex; gap:10px; line-height:1.5; }
-  .notes li::before{ content:'◆'; color: var(--cyan); font-size:9px; margin-top:5px; flex-shrink:0; }
-  .notes b{ color: var(--ink-hi); }
+  .positive{color:var(--green) !important;}
+  .negative{color:var(--red) !important;}
 
-  footer{ text-align:center; margin-top:30px; color: var(--ink-low); font-size:11.5px; font-family: var(--font-mono); }
+  /* ===== Insights ===== */
+  .insights{padding:26px 26px 30px; margin-bottom:24px;}
+  .insights h2{font-size:18px; margin-bottom:18px; color:var(--accent-teal);}
+  .insight-grid{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:18px 22px;
+  }
+  @media (max-width:900px){ .insight-grid{grid-template-columns: repeat(2,1fr);} }
+  @media (max-width:500px){ .insight-grid{grid-template-columns: 1fr;} }
+
+  .insight{
+    background: rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:14px;
+    padding:14px 16px;
+    transition: transform .25s ease;
+  }
+  .insight:hover{transform:translateY(-3px);}
+  .insight label{display:block; font-size:11.5px; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase; letter-spacing:.4px;}
+  .insight span{font-size:16px; font-weight:700; font-family:'Poppins';}
+
+  /* ===== Timeline ===== */
+  .timeline{padding:26px; margin-bottom:24px;}
+  .timeline h2{font-size:18px; margin-bottom:18px; color:var(--accent-blue);}
+  .timeline-grid{display:flex; flex-wrap:wrap; gap:24px;}
+  .timeline .field.editable input{width:150px;}
+
+  footer{text-align:center; color:var(--text-dim); font-size:12px; margin-top:10px; line-height:1.6;}
+  footer button{margin-top:10px;}
+
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15); border-radius:10px;}
 </style>
 </head>
 <body>
 
-<svg class="goo"></svg>
-<div class="liquid-layer">
-  <div class="blob b1"></div>
-  <div class="blob b2"></div>
-  <div class="blob b3"></div>
+<div class="bg-blobs">
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
 </div>
 
-<div class="wrap">
+<div class="app">
 
   <header>
-    <div class="brand">
-      <span class="eyebrow">Info Edge · SAR Vesting</span>
-      <h1>NAUKRI SAR Calculator</h1>
-      <span class="sub">Track what your Stock Appreciation Rights are worth today, and what they could be worth later.</span>
+    <div>
+      <h1>💎 NAUKRI SAR Value Calculator</h1>
+      <div class="sub">Track current & projected worth of your Info Edge (NAUKRI) SARs</div>
     </div>
 
-    <div class="ticker">
-      <div class="sym meta-btn">
-        <b><span id="liveDot" class="live-dot off"></span>NAUKRI.NS</span></b>
+    <div class="cmp-widget glass">
+      <div class="cmp-block">
+        <span class="label">NAUKRI CMP (NSE)</span>
+        <span id="cmpDisplay">--</span>
+        <span id="cmpChange"></span>
+      </div>
+      <div class="cmp-block">
+        <button id="refreshBtn">🔄 Refresh</button>
         <span id="lastUpdated">Not fetched yet</span>
       </div>
-      <div>
-        <div class="price" id="cmpDisplay">₹ —</div>
-        <div class="chg" id="cmpChange">—</div>
+      <div class="toggle-row">
+        <input type="checkbox" id="autoRefresh">
+        <label for="autoRefresh">Auto (60s)</label>
       </div>
-      <button class="refresh-btn" id="refreshBtn" title="Fetch live CMP">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
-      </button>
-      <div class="fetch-note" id="fetchNote">Live fetch may be blocked by your browser/network — you can always type the price manually below.</div>
     </div>
   </header>
 
-  <div class="cards">
+  <section class="grid">
 
     <!-- CURRENT VALUE -->
-    <div class="card current">
-      <div class="card-head">
-        <h2>Current Value</h2>
-        <span class="tag now">Live · Today</span>
+    <div class="card glass current">
+      <h2>📊 Current Value</h2>
+
+      <div class="field editable">
+        <label>Allotted / Exercise Price (₹)</label>
+        <input type="number" id="allottedPrice" value="1130" step="0.01">
+      </div>
+      <div class="field editable">
+        <label>Quantity (SARs)</label>
+        <input type="number" id="qty" value="1000" step="1">
+      </div>
+      <div class="field editable">
+        <label>CMP (₹) <small>auto-filled / editable</small></label>
+        <input type="number" id="cmpInput" value="1200" step="0.01">
+      </div>
+      <div class="field editable">
+        <label>Tax Rate (%)</label>
+        <input type="number" id="taxRate" value="31.2" step="0.1">
       </div>
 
-      <div class="row editable">
-        <span class="k">Quantity</span>
-        <input type="number" id="c_qty" value="1000" min="0" />
-      </div>
-      <div class="row editable">
-        <span class="k">Allotted Price</span>
-        <input type="number" id="c_allotted" value="1130" min="0" />
-      </div>
-      <div class="row">
-        <span class="k">Exercised Price <span class="badge-live" id="curLiveBadge" style="display:none;">LIVE = CMP</span></span>
-        <span class="v" id="c_exercised_display">₹—</span>
-      </div>
+      <hr>
 
-      <div class="divider"></div>
-
-      <div class="row total tax"><span class="k">Tax</span><span class="v" id="c_tax">₹0</span></div>
-      <div class="row total"><span class="k">Vested Amount</span><span class="v" id="c_vested">₹0</span></div>
-      <div class="row total net"><span class="k">Net Amount</span><span class="v" id="c_net">₹0</span></div>
-      <div class="row"><span class="k">Gain vs Allotment</span><span class="v" id="c_gainpct">0%</span></div>
+      <div class="field readonly">
+        <label>Vested (Gross) Amount</label>
+        <span id="vestedCurrent">₹0</span>
+      </div>
+      <div class="field readonly">
+        <label>Tax Amount</label>
+        <span id="taxCurrent">₹0</span>
+      </div>
+      <div class="field readonly highlight">
+        <label>Net In-hand Amount</label>
+        <span id="netCurrent">₹0</span>
+      </div>
     </div>
 
     <!-- PROJECTED VALUE -->
-    <div class="card projected">
-      <div class="card-head">
-        <h2>Projected Value</h2>
-        <div class="head-tags">
-          <span class="tag proj">Scenario</span>
-          <span class="growth-pill" id="growthPill">+0%</span>
-        </div>
+    <div class="card glass projected">
+      <h2>🚀 Projected Value</h2>
+
+      <div class="field editable">
+        <label>Projected Sale Price (₹)</label>
+        <input type="number" id="projectedPrice" value="1500" step="0.01">
+      </div>
+      <div class="field readonly">
+        <label>Quantity (SARs)</label>
+        <span id="qtyProjected">1000</span>
+      </div>
+      <div class="field editable">
+        <label>Tax Rate (%)</label>
+        <input type="number" id="taxRateProjected" value="31.2" step="0.1">
       </div>
 
-      <div class="row"><span class="k">Quantity <span class="badge-live">from Current</span></span><span class="v" id="p_qty">1,000</span></div>
-      <div class="row"><span class="k">Allotted Price <span class="badge-live">from Current</span></span><span class="v" id="p_allotted">₹1,130</span></div>
-      <div class="row editable">
-        <span class="k">Target Price</span>
-        <input type="number" id="p_exercised" value="1500" />
+      <hr>
+
+      <div class="field readonly">
+        <label>Vested (Gross) Amount</label>
+        <span id="vestedProjected">₹0</span>
       </div>
-      <div class="slider-wrap">
-        <input type="range" id="p_slider" min="500" max="4000" step="10" value="1500" />
+      <div class="field readonly">
+        <label>Tax Amount</label>
+        <span id="taxProjected">₹0</span>
       </div>
-
-      <div class="divider"></div>
-
-      <div class="row total tax"><span class="k">Tax</span><span class="v" id="p_tax">₹0</span></div>
-      <div class="row total"><span class="k">Vested Amount</span><span class="v" id="p_vested">₹0</span></div>
-      <div class="row total net"><span class="k">Net Amount</span><span class="v" id="p_net">₹0</span></div>
-      <div class="row"><span class="k">Net Amount Growth vs Current</span><span class="v" id="p_netgrowth">0%</span></div>
+      <div class="field readonly highlight">
+        <label>Net In-hand Amount</label>
+        <span id="netProjected">₹0</span>
+      </div>
     </div>
-  </div>
+  </section>
 
-  <div class="compare">
-    <h3>Net Amount — Current vs Projected</h3>
-    <div class="bar-row">
-      <div class="bar-label"><span>Current</span><b id="bar_c_val">₹0</b></div>
-      <div class="bar-track"><div class="bar-fill current" id="bar_c" style="width:0%"></div></div>
+  <!-- TIMELINE -->
+  <section class="timeline glass">
+    <h2>🗓️ Timeline & Annualized Return</h2>
+    <div class="timeline-grid">
+      <div class="field editable">
+        <label>Grant / Allotment Date</label>
+        <input type="date" id="grantDate">
+      </div>
+      <div class="field readonly">
+        <label>Today</label>
+        <span id="todayDate">-</span>
+      </div>
+      <div class="field editable">
+        <label>Target Sale Date (Projected)</label>
+        <input type="date" id="targetDate">
+      </div>
+      <div class="field readonly">
+        <label>Holding Period (Today)</label>
+        <span id="holdingCurrent">-</span>
+      </div>
+      <div class="field readonly">
+        <label>Holding Period (Target)</label>
+        <span id="holdingProjected">-</span>
+      </div>
+      <div class="field readonly">
+        <label>CAGR (Current)</label>
+        <span id="cagrCurrent">-</span>
+      </div>
+      <div class="field readonly">
+        <label>CAGR (Projected)</label>
+        <span id="cagrProjected">-</span>
+      </div>
     </div>
-    <div class="bar-row">
-      <div class="bar-label"><span>Projected</span><b id="bar_p_val">₹0</b></div>
-      <div class="bar-track"><div class="bar-fill projected" id="bar_p" style="width:0%"></div></div>
+  </section>
+
+  <!-- INSIGHTS -->
+  <section class="insights glass">
+    <h2>🔍 Additional Insights</h2>
+    <div class="insight-grid">
+      <div class="insight"><label>Break-even Price</label><span id="breakEven">-</span></div>
+      <div class="insight"><label>Current Gain %</label><span id="gainPercentCurrent">-</span></div>
+      <div class="insight"><label>Projected Gain %</label><span id="gainPercentProjected">-</span></div>
+      <div class="insight"><label>Extra Upside if you Wait</label><span id="upside">-</span></div>
+      <div class="insight"><label>Total Notional Cost</label><span id="notionalCost">-</span></div>
+      <div class="insight"><label>Current Market Value</label><span id="marketValueCurrent">-</span></div>
+      <div class="insight"><label>Projected Market Value</label><span id="marketValueProjected">-</span></div>
+      <div class="insight"><label>Effective Tax Paid (Current)</label><span id="effectiveTaxCurrent">-</span></div>
     </div>
-  </div>
+  </section>
 
-  <div class="notes">
-    <h3>Things worth adding to your model</h3>
-    <ul>
-      <li><b>Break-even price</b> is your allotted price (₹<span id="note_breakeven">1,130</span>) — below this, exercising loses money before tax; the calculator assumes you'd never exercise below this.</li>
-      <li><b>Perquisite vs capital gains tax:</b> in India, ESOP/SAR gains are usually taxed twice — as a <b>perquisite</b> (salary income, at your slab rate) on the spread at exercise, and again as <b>capital gains</b> (STCG/LTCG) if the share price moves further before you sell. This tool applies one flat rate for simplicity — check with a CA for your exact slab + holding period.</li>
-      <li><b>Holding period:</b> shares held over 12 months from exercise qualify for LTCG (lower rate) instead of STCG — worth tracking your exercise date separately from your allotment date.</li>
-      <li><b>Multiple tranches:</b> if you have SARs allotted at different prices/dates, each tranche has its own break-even and tax timeline — this version handles one tranche at a time.</li>
-      <li><b>CMP live-fetch</b> is best-effort (routed through a few public CORS proxies with automatic fallback) and can still fail if you're offline or every proxy is down — tap the refresh icon to retry. The <b>Target Price</b> in the Projected card is always yours to edit.</li>
-    </ul>
-  </div>
+  <footer>
+    <p>⚠️ Live price is fetched best-effort via a public proxy (Yahoo Finance data for <b>NAUKRI.NS</b>). If it fails due to network/CORS restrictions, just type the CMP manually — all calculations still work instantly.</p>
+    <p>Your inputs auto-save in this browser (localStorage). Not investment/tax advice — verify final tax treatment with your CA.</p>
+    <button id="resetBtn">↺ Reset to Defaults</button>
+  </footer>
 
-  <footer>Personal finance tool · Not investment or tax advice · Figures are illustrative</footer>
 </div>
 
 <script>
-  const fmtINR = (n) => {
-    if (isNaN(n)) return '₹0';
-    const neg = n < 0;
-    const abs = Math.abs(Math.round(n));
-    const s = abs.toLocaleString('en-IN');
-    return (neg ? '-₹' : '₹') + s;
+(function(){
+  const $ = id => document.getElementById(id);
+
+  const els = {
+    allottedPrice: $('allottedPrice'),
+    qty: $('qty'),
+    cmpInput: $('cmpInput'),
+    taxRate: $('taxRate'),
+    projectedPrice: $('projectedPrice'),
+    taxRateProjected: $('taxRateProjected'),
+    grantDate: $('grantDate'),
+    targetDate: $('targetDate'),
   };
-  const fmtNum = (n) => isNaN(n) ? '0' : Math.round(n).toLocaleString('en-IN');
-  const fmtPct = (n) => (isNaN(n) ? 0 : n).toFixed(1) + '%';
 
-  const el = (id) => document.getElementById(id);
+  const out = {
+    vestedCurrent: $('vestedCurrent'),
+    taxCurrent: $('taxCurrent'),
+    netCurrent: $('netCurrent'),
+    vestedProjected: $('vestedProjected'),
+    taxProjected: $('taxProjected'),
+    netProjected: $('netProjected'),
+    qtyProjected: $('qtyProjected'),
+    breakEven: $('breakEven'),
+    gainPercentCurrent: $('gainPercentCurrent'),
+    gainPercentProjected: $('gainPercentProjected'),
+    upside: $('upside'),
+    notionalCost: $('notionalCost'),
+    marketValueCurrent: $('marketValueCurrent'),
+    marketValueProjected: $('marketValueProjected'),
+    effectiveTaxCurrent: $('effectiveTaxCurrent'),
+    todayDate: $('todayDate'),
+    holdingCurrent: $('holdingCurrent'),
+    holdingProjected: $('holdingProjected'),
+    cagrCurrent: $('cagrCurrent'),
+    cagrProjected: $('cagrProjected'),
+  };
 
-  function animateNumber(node, from, to, isCurrency){
-    const dur = 500, start = performance.now();
-    function step(t){
-      const p = Math.min(1, (t - start) / dur);
-      const eased = 1 - Math.pow(1 - p, 3);
-      const val = from + (to - from) * eased;
-      node.textContent = isCurrency ? fmtINR(val) : fmtNum(val);
-      if (p < 1) requestAnimationFrame(step);
-    }
-    requestAnimationFrame(step);
+  const cmpDisplay = $('cmpDisplay');
+  const cmpChange = $('cmpChange');
+  const lastUpdated = $('lastUpdated');
+  const refreshBtn = $('refreshBtn');
+  const autoRefresh = $('autoRefresh');
+  const resetBtn = $('resetBtn');
+
+  const STORAGE_KEY = 'naukriSarCalc_v1';
+
+  const DEFAULTS = {
+    allottedPrice: 1130,
+    qty: 1000,
+    cmpInput: 1200,
+    taxRate: 31.2,
+    projectedPrice: 1500,
+    taxRateProjected: 31.2,
+    grantDate: '',
+    targetDate: ''
+  };
+
+  const inr = n => isFinite(n) ? n.toLocaleString('en-IN', {style:'currency', currency:'INR', maximumFractionDigits:0}) : '₹0';
+  const pct = n => isFinite(n) ? n.toFixed(2)+'%' : '-';
+
+  function setColor(el, value){
+    el.classList.remove('positive','negative');
+    if(value > 0) el.classList.add('positive');
+    else if(value < 0) el.classList.add('negative');
   }
 
-  let lastValues = {};
-  const TAX_RATE = 0.312; // 31.2% — flat rate applied to gain, kept out of the UI per request
-  let liveCMP = null; // last successfully fetched market price
-
-  function calc(){
-    const qty = parseFloat(el('c_qty').value) || 0;
-    const allotted = parseFloat(el('c_allotted').value) || 0;
-    const taxRate = TAX_RATE;
-
-    const cExercised = liveCMP !== null ? liveCMP : 0;
-    const pExercised = parseFloat(el('p_exercised').value) || 0;
-
-    // projected mirrors current inputs
-    el('p_qty').textContent = fmtNum(qty);
-    el('p_allotted').textContent = fmtINR(allotted);
-    el('note_breakeven').textContent = fmtNum(allotted);
-    el('c_exercised_display').textContent = liveCMP !== null ? fmtINR(liveCMP) : '₹—';
-
-    // current value calcs — held back until we have a real live price
-    const haveCMP = liveCMP !== null;
-    const cProfit = haveCMP ? Math.max(0, cExercised - allotted) * qty : 0;
-    const cTax = cProfit * taxRate;
-    const cVested = cProfit;
-    const cNet = cVested - cTax;
-    const cGainPct = (haveCMP && allotted) ? ((cExercised - allotted) / allotted) * 100 : 0;
-
-    animateNumber(el('c_tax'), lastValues.cTax ?? 0, cTax, true);
-    animateNumber(el('c_vested'), lastValues.cVested ?? 0, cVested, true);
-    animateNumber(el('c_net'), lastValues.cNet ?? 0, cNet, true);
-    el('c_gainpct').textContent = haveCMP ? fmtPct(cGainPct) : '—';
-    el('c_gainpct').style.color = cGainPct >= 0 ? 'var(--teal)' : 'var(--coral)';
-
-    // projected value calcs
-    const pProfit = Math.max(0, pExercised - allotted) * qty;
-    const pTax = pProfit * taxRate;
-    const pVested = pProfit;
-    const pNet = pVested - pTax;
-
-    animateNumber(el('p_tax'), lastValues.pTax ?? 0, pTax, true);
-    animateNumber(el('p_vested'), lastValues.pVested ?? 0, pVested, true);
-    animateNumber(el('p_net'), lastValues.pNet ?? 0, pNet, true);
-
-    // growth pill: price growth vs current exercised price
-    const pill = el('growthPill');
-    if (haveCMP && cExercised){
-      const priceGrowth = ((pExercised - cExercised) / cExercised) * 100;
-      pill.textContent = (priceGrowth >= 0 ? '+' : '') + priceGrowth.toFixed(1) + '%';
-      pill.classList.toggle('neg', priceGrowth < 0);
-    } else {
-      pill.textContent = '—';
-      pill.classList.remove('neg');
-    }
-
-    // net growth vs current net
-    if (haveCMP && cNet){
-      const netGrowth = ((pNet - cNet) / cNet) * 100;
-      el('p_netgrowth').textContent = (netGrowth >= 0 ? '+' : '') + netGrowth.toFixed(1) + '%';
-      el('p_netgrowth').style.color = netGrowth >= 0 ? 'var(--teal)' : 'var(--coral)';
-    } else {
-      el('p_netgrowth').textContent = '—';
-      el('p_netgrowth').style.color = 'var(--ink-mid)';
-    }
-
-    // comparison bars
-    const maxNet = Math.max(cNet, pNet, 1);
-    el('bar_c').style.width = Math.max(0, (cNet / maxNet) * 100) + '%';
-    el('bar_p').style.width = Math.max(0, (pNet / maxNet) * 100) + '%';
-    el('bar_c_val').textContent = fmtINR(cNet);
-    el('bar_p_val').textContent = fmtINR(pNet);
-
-    // sync slider with target price field
-    if (document.activeElement !== el('p_slider')) {
-      el('p_slider').value = Math.min(4000, Math.max(500, pExercised));
-    }
-
-    lastValues = { cTax, cVested, cNet, pTax, pVested, pNet };
+  function saveState(){
+    const state = {};
+    Object.keys(els).forEach(k => state[k] = els[k].value);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }
 
-  // wire inputs
-  ['c_qty','c_allotted','p_exercised'].forEach(id => {
-    el(id).addEventListener('input', calc);
-  });
-  el('p_slider').addEventListener('input', (e) => {
-    el('p_exercised').value = e.target.value;
-    calc();
-  });
-
-  calc();
-
-  // ---------- live CMP fetch (best-effort, always falls back to manual) ----------
-  // Yahoo Finance itself doesn't send CORS headers, so a browser (including one
-  // hosted on GitHub Pages) can't call it directly — we route through a public
-  // CORS-proxy. No single proxy has 100% uptime, so we try a few in order.
-  const YAHOO_TARGET = 'https://query1.finance.yahoo.com/v8/finance/chart/NAUKRI.NS?interval=1d&range=1d';
-
-  const PROXIES = [
-    (u) => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
-    (u) => 'https://corsproxy.io/?url=' + encodeURIComponent(u),
-    (u) => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u),
-    (u) => 'https://thingproxy.freeboard.io/fetch/' + u,
-  ];
-
-  function fetchWithTimeout(url, ms){
-    const controller = new AbortController();
-    const t = setTimeout(() => controller.abort(), ms);
-    return fetch(url, { cache: 'no-store', signal: controller.signal }).finally(() => clearTimeout(t));
+  function loadState(){
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    const merged = Object.assign({}, DEFAULTS, saved);
+    Object.keys(els).forEach(k => { els[k].value = merged[k]; });
   }
 
-  async function fetchLiveCMP(){
-    const btn = el('refreshBtn');
-    btn.classList.add('spinning');
-    el('fetchNote').textContent = 'Fetching latest price for NAUKRI.NS…';
+  function daysBetween(d1, d2){
+    return (d2 - d1) / (1000*60*60*24);
+  }
 
-    let lastErr = null;
-    for (const buildUrl of PROXIES){
-      try{
-        const res = await fetchWithTimeout(buildUrl(YAHOO_TARGET), 6000);
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-        const meta = data?.chart?.result?.[0]?.meta;
-        if (!meta || !meta.regularMarketPrice) throw new Error('No price in response');
+  function recalcAll(){
+    const allotted = parseFloat(els.allottedPrice.value) || 0;
+    const qty = parseFloat(els.qty.value) || 0;
+    const cmp = parseFloat(els.cmpInput.value) || 0;
+    const taxRate = parseFloat(els.taxRate.value) || 0;
+    const projectedPrice = parseFloat(els.projectedPrice.value) || 0;
+    const taxRateProjected = parseFloat(els.taxRateProjected.value) || 0;
 
-        const price = meta.regularMarketPrice;
-        const prevClose = meta.previousClose ?? meta.chartPreviousClose ?? price;
-        const change = price - prevClose;
-        const changePct = prevClose ? (change / prevClose) * 100 : 0;
+    // ----- Current -----
+    const vestedCurrent = (cmp - allotted) * qty;
+    const taxCurrent = vestedCurrent > 0 ? vestedCurrent * taxRate/100 : 0;
+    const netCurrent = vestedCurrent - taxCurrent;
 
-        el('cmpDisplay').textContent = fmtINR(price);
-        const chgNode = el('cmpChange');
-        chgNode.textContent = (change >= 0 ? '+' : '') + change.toFixed(2) + ' (' + changePct.toFixed(2) + '%)';
-        chgNode.className = 'chg ' + (change >= 0 ? 'up' : 'down');
+    out.vestedCurrent.textContent = inr(vestedCurrent);
+    out.taxCurrent.textContent = inr(taxCurrent);
+    out.netCurrent.textContent = inr(netCurrent);
+    setColor(out.vestedCurrent, vestedCurrent);
+    setColor(out.netCurrent, netCurrent);
 
-        el('liveDot').classList.remove('off');
-        el('lastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString();
-        el('fetchNote').textContent = 'Live price pulled from Yahoo Finance (NAUKRI.NS).';
+    // ----- Projected -----
+    const vestedProjected = (projectedPrice - allotted) * qty;
+    const taxProjected = vestedProjected > 0 ? vestedProjected * taxRateProjected/100 : 0;
+    const netProjected = vestedProjected - taxProjected;
 
-        liveCMP = price;
-        el('curLiveBadge').style.display = 'inline-block';
-        btn.classList.remove('spinning');
-        calc();
-        return; // success — stop trying other proxies
-      }catch(err){
-        lastErr = err;
-        // try next proxy
+    out.qtyProjected.textContent = qty;
+    out.vestedProjected.textContent = inr(vestedProjected);
+    out.taxProjected.textContent = inr(taxProjected);
+    out.netProjected.textContent = inr(netProjected);
+    setColor(out.vestedProjected, vestedProjected);
+    setColor(out.netProjected, netProjected);
+
+    // ----- Insights -----
+    const gainPercentCurrent = allotted ? ((cmp-allotted)/allotted*100) : 0;
+    const gainPercentProjected = allotted ? ((projectedPrice-allotted)/allotted*100) : 0;
+    const upside = netProjected - netCurrent;
+    const notionalCost = allotted * qty;
+    const marketValueCurrent = cmp * qty;
+    const marketValueProjected = projectedPrice * qty;
+
+    out.breakEven.textContent = inr(allotted);
+    out.gainPercentCurrent.textContent = pct(gainPercentCurrent);
+    out.gainPercentProjected.textContent = pct(gainPercentProjected);
+    out.upside.textContent = inr(upside);
+    out.notionalCost.textContent = inr(notionalCost);
+    out.marketValueCurrent.textContent = inr(marketValueCurrent);
+    out.marketValueProjected.textContent = inr(marketValueProjected);
+    out.effectiveTaxCurrent.textContent = inr(taxCurrent);
+
+    setColor(out.gainPercentCurrent, gainPercentCurrent);
+    setColor(out.gainPercentProjected, gainPercentProjected);
+    setColor(out.upside, upside);
+
+    // ----- Timeline -----
+    const today = new Date();
+    out.todayDate.textContent = today.toLocaleDateString('en-IN', {day:'2-digit', month:'short', year:'numeric'});
+
+    const grant = els.grantDate.value ? new Date(els.grantDate.value) : null;
+    const target = els.targetDate.value ? new Date(els.targetDate.value) : null;
+
+    if(grant){
+      const daysCur = daysBetween(grant, today);
+      const yearsCur = daysCur/365.25;
+      out.holdingCurrent.textContent = yearsCur > 0 ? yearsCur.toFixed(2)+' yrs' : '-';
+
+      if(allotted > 0 && cmp > 0 && yearsCur > 0){
+        const cagrCur = (Math.pow(cmp/allotted, 1/yearsCur) - 1) * 100;
+        out.cagrCurrent.textContent = pct(cagrCur);
+        setColor(out.cagrCurrent, cagrCur);
+      } else out.cagrCurrent.textContent = '-';
+
+      if(target){
+        const daysProj = daysBetween(grant, target);
+        const yearsProj = daysProj/365.25;
+        out.holdingProjected.textContent = yearsProj > 0 ? yearsProj.toFixed(2)+' yrs' : '-';
+
+        if(allotted > 0 && projectedPrice > 0 && yearsProj > 0){
+          const cagrProj = (Math.pow(projectedPrice/allotted, 1/yearsProj) - 1) * 100;
+          out.cagrProjected.textContent = pct(cagrProj);
+          setColor(out.cagrProjected, cagrProj);
+        } else out.cagrProjected.textContent = '-';
+      } else {
+        out.holdingProjected.textContent = '-';
+        out.cagrProjected.textContent = '-';
       }
+    } else {
+      out.holdingCurrent.textContent = '-';
+      out.holdingProjected.textContent = '-';
+      out.cagrCurrent.textContent = '-';
+      out.cagrProjected.textContent = '-';
     }
 
-    // all proxies failed
-    btn.classList.remove('spinning');
-    el('liveDot').classList.add('off');
-    el('lastUpdated').textContent = 'Live fetch failed';
-    if (liveCMP === null){
-      el('cmpDisplay').textContent = '₹ —';
-      el('cmpChange').textContent = 'Unavailable';
-      el('cmpChange').className = 'chg';
-      el('curLiveBadge').style.display = 'none';
-    }
-    el('fetchNote').textContent = 'All live-price proxies were unreachable just now (' + (lastErr?.message || 'network error') + '). Tap refresh to retry — this can happen if a proxy is temporarily down or your network blocks it.';
-    calc();
+    saveState();
   }
 
-  el('refreshBtn').addEventListener('click', fetchLiveCMP);
-  // try once on load
-  fetchLiveCMP();
+  // ===== Live CMP Fetch =====
+  async function fetchCMP(){
+    lastUpdated.textContent = 'Fetching...';
+    try{
+      const target = 'https://query1.finance.yahoo.com/v8/finance/chart/NAUKRI.NS';
+      const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(target);
+      const res = await fetch(proxyUrl);
+      if(!res.ok) throw new Error('Network error');
+      const data = await res.json();
+      const meta = data.chart.result[0].meta;
+      const price = meta.regularMarketPrice;
+      const prevClose = meta.previousClose || meta.chartPreviousClose || price;
+
+      els.cmpInput.value = price.toFixed(2);
+      cmpDisplay.textContent = '₹' + price.toFixed(2);
+
+      const change = price - prevClose;
+      const changePct = (change/prevClose)*100;
+      cmpChange.textContent = (change>=0?'+':'') + change.toFixed(2) + ' (' + changePct.toFixed(2) + '%)';
+      cmpChange.classList.remove('positive','negative');
+      cmpChange.classList.add(change>=0 ? 'positive':'negative');
+
+      lastUpdated.textContent = 'Updated: ' + new Date().toLocaleTimeString('en-IN');
+      recalcAll();
+    }catch(err){
+      console.error('Live fetch failed:', err);
+      cmpDisplay.textContent = '₹' + (parseFloat(els.cmpInput.value)||0).toFixed(2) + ' (manual)';
+      lastUpdated.textContent = '⚠️ Live fetch failed — using manual value';
+    }
+  }
+
+  // ===== Events =====
+  Object.values(els).forEach(el => el.addEventListener('input', recalcAll));
+  refreshBtn.addEventListener('click', fetchCMP);
+
+  let autoTimer = null;
+  autoRefresh.addEventListener('change', () => {
+    if(autoRefresh.checked){
+      autoTimer = setInterval(fetchCMP, 60000);
+    } else {
+      clearInterval(autoTimer);
+    }
+  });
+
+  resetBtn.addEventListener('click', () => {
+    localStorage.removeItem(STORAGE_KEY);
+    loadState();
+    recalcAll();
+  });
+
+  // ===== Init =====
+  loadState();
+  recalcAll();
+  fetchCMP();
+})();
 </script>
+
 </body>
 </html>
